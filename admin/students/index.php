@@ -1,3 +1,15 @@
+<?php
+ session_start();
+    include "../../config/database.php";
+    if(!isset($_SESSION["role"]) || $_SESSION["role"] != "admin"){
+        header("Location: ../../index.php");
+        exit;
+    }
+    //Get all students
+    $sql = "SELECT * FROM users 
+    WHERE role='student' ORDER BY id DESC";
+    $result = mysqli_query($conn, $sql);
+?>
 <!doctype html>
 <html lang="en">
 
@@ -56,7 +68,7 @@
 
             <a
                 class="btn btn-primary"
-                href="student_form.html"
+                href="create.php"
             >
                 + Add Student
             </a>
@@ -81,15 +93,16 @@
                     <tbody>
 
                         <!-- Student Record -->
+                         <?php while($row = mysqli_fetch_assoc($result)) {?>
                         <tr>
-                            <td>2026-0001</td>
+                            <td><?php echo htmlspecialchars($row['student_no']);?></td>
 
                             <td>
-                                Juan Dela Cruz
+                                <?php echo htmlspecialchars($row['full_name']);?>
                             </td>
 
                             <td>
-                                juan
+                                <?php echo htmlspecialchars($row['username']);?>
                             </td>
 
                             <td>
@@ -102,19 +115,21 @@
 
                                 <a
                                     class="btn btn-warning btn-sm"
-                                    href="student_form.html"
+                                    href="delete,php?id=<?php echo $row['id']?>"
                                 >
                                     Edit
                                 </a>
 
-                                <button
+                                <a
                                     class="btn btn-danger btn-sm"
+                                    href="delete,php?id=<?php echo $row['id']?>"
+                                    onclick="return confirm('Are you sure you want to delete this record?')"
                                 >
                                     Delete
                                 </button>
                             </td>
                         </tr>
-
+                        <?php }?>
                     </tbody>
 
                 </table>
