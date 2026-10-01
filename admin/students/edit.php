@@ -1,41 +1,51 @@
 <?php 
-session_start();
+  
+  session_start();
     include "../../config/database.php";
-    if(!isset($_SESSION["role"]) || $_SESSION["role"] != "admin"){
+
+    // only admin can access this page.
+    if(!isset($_SESSION ["role"]) || $_SESSION["role"] != "admin"){
         header("Location: ../../index.php");
-        exit;
+        exit();
     }
+    // shorcut for condition
     $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-    $result = mysqli_query($conn, "SELECT * FROM users
-    WHERE id=$id AND role='student' ");
-    $student = mysqli_fetch_assoac($result);
+    $result = mysqli_query($conn, "SELECT * FROM users WHERE id=$id AND role='student'");
+    $student = mysqli_fetch_assoc($result);
 
-if(!$student) {
-    die('Student not found');
-}
-$message = "";
-if(isset($_POST['update'])) {
-    $student_no $_POST['student_no'];
-    $full_name = $_POST['full_name'];
-    $username = $_POST['username'];
-}
-//if password is blank, leave old password
-if($_POST['password'] == ) {
-    $sql = "UPDATE users SET
-    student_no ="
-}
+    if(!$student){
+        die('Student not found');
+    }
+    $message = "";
+    if(isset($_POST['update'])){
+        $student_no = $_POST['student_no'];
+        $full_name = $_POST['full_name'];
+        $username = $_POST['username'];
 
-else {
-    $new_password = password_hash($_POST['password'], PASSWORD_DEFAULT)
-    $sql = "UPDATE users SET
-    student_no = '$student_no',
-    full_name = $full_name',
-    username = $username',
-    password = $new_password'
-    WHERE id=$id AND role = 'student'
-    ";
-}
+        // if password is blank, keep the old password
+        if($_POST['password'] == ""){
+            $sql = "UPDATE users SET student_no = '$student_no', 
+                                    full_name = '$full_name' ,
+                                    username = '$username' WHERE id=$id AND role='student'";
+        }
+        else{
+            $new_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            $sql = "UPDATE users SET student_no = '$student_no', 
+                                    full_name = '$full_name' ,
+                                    username = '$username' ,
+                                    password = '$new_password' WHERE id=$id AND role='student'";
+        }
 
+        if(mysqli_query($conn, $sql)){
+            header("Location: index.php");
+            exit;
+        }
+        else{
+            $message = "Could not update";
+        }
+
+
+    }
 ?>
 <!doctype html>
 <html lang="en">
@@ -50,18 +60,21 @@ else {
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
             <h2>Edit Student Account</h2>
+            <?php if($message != ""){?>
+                        <div class="alert alert-danger"><?php echo $message;?></div>
+                    <?php } ?>
                         <form method="POST">
                 <div class="mb-3">
                     <label class="form-label">Student Number</label>
-                    <input type="text" name="student_no" class="form-control" value="<?php echo htmlspecialchars($student['student_no']);?> "required>
+                    <input type="text" name="student_no" class="form-control" value="<?php echo htmlspecialchars($student['student_no']);?>" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Full Name</label>
-                    <input type="text" name="full_name" class="form-control" value="<?php echo htmlspecialchars($student['student_no']);?> "required>" 
+                    <input type="text" name="full_name" class="form-control" value="<?php echo htmlspecialchars($student['full_name']);?>" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Username</label>
-                    <input type="text" name="username" class="form-control" value="<?php echo htmlspecialchars($student['student_no']);?> "required>" 
+                    <input type="text" name="username" class="form-control" value="<?php echo htmlspecialchars($student['username']);?>" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">New Password <span class="text-muted">(leave blank to keep old password)</span></label>
