@@ -1,3 +1,17 @@
+<?php
+    session_start();
+    include "../../config/database.php";
+
+    // only admin can access this page.
+    if(!isset($_SESSION ["role"]) || $_SESSION["role"] != "admin"){
+        header("Location: ../../index.php");
+        exit();
+    }
+    // nilalabas ang marami
+    $sql = "SELECT * FROM subjects";
+    $result = mysqli_query($conn , $sql);
+
+?> 
 <!doctype html>
 <html lang="en">
 
@@ -49,13 +63,13 @@
             <div>
                 <h2>Subjects</h2>
 
-                <a href="dashboard.html">
+                <a href="../dashboard.php">
                     ← Dashboard
                 </a>
             </div>
 
             <a
-                href="subject_form.html"
+                href="create.php"
                 class="btn btn-primary"
             >
                 + Add Subject
@@ -82,31 +96,38 @@
                     <tbody>
 
                         <!-- Subject Record -->
+                       <?php while($row = mysqli_fetch_assoc($result)){?>
                         <tr>
-                            <td>IT101</td>
+                            <td><?php echo htmlspecialchars($row["subject_code"]);?></td>
 
                             <td>
-                                Introduction to Computing
+                                <?php echo htmlspecialchars($row["subject_name"]);?>
                             </td>
 
-                            <td>3</td>
+                            <td>
+                                <?php echo htmlspecialchars($row["units"]);?>
+                            </td>
 
                             <td>
                                 <a
-                                    href="subject_form.html"
-                                    class="btn btn-warning btn-sm"
+                                   class="btn btn-warning btn-sm"
+                                    href="edit.php?id=<?php echo $row['id'];?>"
+                                    
                                 >
                                     Edit
                                 </a>
 
-                                <button
+                                <a
+                                    
                                     class="btn btn-danger btn-sm"
+                                    href="delete.php?id=<?php echo $row['id'];?>"
+                                    onclick ="return confirm('Are you sure you want to delete this information?')"
                                 >
                                     Delete
-                                </button>
+                                <a>
                             </td>
                         </tr>
-
+                        <?php } ?>
                     </tbody>
 
                 </table>
